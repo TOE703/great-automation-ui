@@ -1,0 +1,23 @@
+version: 2.1
+
+python: &python
+  image: cimg/python:3.9.13
+
+jobs:
+  auto:
+    docker:
+      - image: cimg/base:stable
+      - <<: *python
+    steps:
+      - checkout
+      - run:
+          name: "Auto"
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            BROWSERSTACK_USERNAME="$BROWSERSTACK_USERNAME" BROWSERSTACK_ACCESS_KEY="$BROWSERSTACK_ACCESS_KEY" browserstack-sdk pytest tests/international/international_contact_test.py::test_contact_invest_success
+
+workflows:
+  auto-workflow:
+    jobs:
+      - auto
