@@ -1,0 +1,18 @@
+pytest==6.2.5
+pytest-xdist==3.2.1
+
+selenium==4.8.2
+webdriver-manager==3.8.5
+
+browserstack-sdk==1.6.0
+pytest-selenium==4.0.0
+
+faker==17.6.0
+
+# pytest pytest-xdist selenium webdriver-manager browserstack-sdk pytest-selenium faker
+# deactivate
+# python -m venv .venv
+# source .venv/bin/activate
+
+# pip-compile --upgrade -r --annotate requirements.in
+# pip install -q -r requirements.txt
