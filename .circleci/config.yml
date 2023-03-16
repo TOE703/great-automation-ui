@@ -5,6 +5,7 @@ python: &python
 
 jobs:
   auto:
+    working_directory: ~/greatauto
     docker:
       - image: cimg/base:stable
       - <<: *python
