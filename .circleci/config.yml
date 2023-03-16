@@ -16,7 +16,7 @@ jobs:
           command: |
             # python3 -m venv the_venv
             # source the_venv/bin/activate
-            pip install -q -r requirements.txt
+            python3 -m pip install -q -r requirements.txt
             BROWSERSTACK_USERNAME="$BROWSERSTACK_USERNAME" BROWSERSTACK_ACCESS_KEY="$BROWSERSTACK_ACCESS_KEY" browserstack-sdk pytest tests/international/international_contact_test.py::test_contact_invest_success
 
 workflows:
