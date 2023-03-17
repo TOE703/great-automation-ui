@@ -56,7 +56,7 @@ jobs:
           name: Connect to VPN
           command: >
             sudo openvpn --config ~/.ovpn/config.ovpn  > ~/.ovpn/openvpn.log 2>&1 &
-            cat openvpn.log
+            cat ~/.ovpn/openvpn.log
 
       - run:
           name: Run the tests
