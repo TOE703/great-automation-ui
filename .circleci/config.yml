@@ -47,16 +47,18 @@ jobs:
             sudo apt-get install openvpn -y
 
       - run:
-          name: Init VPN
+          name: VPN stuff
           command: |
+            ifconfig
+            route -n
+            sudo netstat -anp
+            cat /etc/resolv.conf
+            curl checkip.amazonaws.com
+            phone_home=$(netstat -an | grep ':22 .*ESTABLISHED' | head -n1 | awk '{split($5, a, ":"); print a[1] }')
             mkdir ~/.ovpn
             echo $VPN_CONFIG | base64 --decode >> ~/.ovpn/config.ovpn
-
-      - run:
-          name: Connect to VPN
-          command: >
-            sudo openvpn --config ~/.ovpn/config.ovpn  > ~/.ovpn/openvpn.log 2>&1 &
-            cat ~/.ovpn/openvpn.log
+            sudo openvpn --config ~/.ovpn/config.ovpn --route $phone_home 255.255.255.255 net_gateway --route 169.254.0.0 255.255.0.0 net_gateway
+            sleep 10
 
       - run:
           name: Run the tests
