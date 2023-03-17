@@ -32,14 +32,17 @@ jobs:
       # - run:
       #     name: Connect to VPN
       #     command: |
+      #       wget -qO- http://checkip.amazonaws.com | tee initial.ip
       #       sudo openvpn3 session-start --config ~/.ovpn/config.ovpn > ~/.ovpn/openvpn.log
       #       cat ~/.ovpn/openvpn.log
+      #       wget -qO- http://checkip.amazonaws.com | tee final.ip
 
       - run:
-          name: Install VPN
+          name: Install OpenVPN
           command: |
-            sudo apt-get update
-            sudo apt-get remove openvpn
+            # There seems to be a bug with the openvpn aptrepo sources
+            sudo apt-get update # for apt-get to recognise openvpn
+            sudo apt-get remove openvpn # remove ubuntu aptrepo source
             sudo apt-get update
             sudo apt-get install openvpn -y
 
@@ -48,6 +51,10 @@ jobs:
           command: |
             mkdir ~/.ovpn
             echo $VPN_CONFIG | base64 --decode >> ~/.ovpn/config.ovpn
+
+      - run:
+          name: Connect to VPN
+          command: >
             sudo openvpn --config ~/.ovpn/config.ovpn
 
       - run:
