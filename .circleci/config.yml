@@ -48,7 +48,6 @@ jobs:
           command: |
             mkdir ~/.ovpn
             echo $VPN_CONFIG | base64 --decode >> ~/.ovpn/config.ovpn
-            sudo cp ~/.ovpn/config.ovpn ~/.ovpn/config.config
             sudo openvpn --config ~/.ovpn/config.ovpn
 
       - run:
