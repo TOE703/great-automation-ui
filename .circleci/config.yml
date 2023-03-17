@@ -36,16 +36,19 @@ jobs:
       #       cat ~/.ovpn/openvpn.log
 
       - run:
-          name: VPN stuff
+          name: Install VPN
           command: |
             sudo apt-get update
             sudo apt-get remove openvpn
             sudo apt-get update
-            sudo apt-get install openvpn openvpn-systemd-resolved -y
+            sudo apt-get install openvpn -y
 
+      - run:
+          name: Init VPN
+          command: |
             mkdir ~/.ovpn
             echo $VPN_CONFIG | base64 --decode >> ~/.ovpn/config.ovpn
-            sudo cp ~/.ovpn/config.ovpn ~/.ovpn/config.config
+            sudo cp ~/.ovpn/config.ovpn ~/.ovpn/config.ovpn
             sudo openvpn --config ~/.ovpn/config.ovpn
 
       - run:
