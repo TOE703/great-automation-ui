@@ -10,8 +10,40 @@ jobs:
       - <<: *python
     steps:
       - checkout
+
       - run:
-          name: "Auto"
+          name: Install OpenVPN
+          command: |
+            sudo apt update
+            sudo apt install apt-transport-https
+            sudo wget https://swupdate.openvpn.net/repos/openvpn-repo-pkg-key.pub
+            sudo apt-key add openvpn-repo-pkg-key.pub
+            sudo wget -O /etc/apt/sources.list.d/openvpn3.list https://swupdate.openvpn.net/community/openvpn3/repos/openvpn3-$(sed 's/UBUNTU_CODENAME=//;t;d' /etc/os-release).list
+            sudo apt update
+            sudo apt install -y openvpn3
+
+      - run:
+          name: Init VPN
+          command: |
+            mkdir ~/.ovpn
+            echo $VPN_CONFIG | base64 --decode >> ~/.ovpn/config.ovpn
+            phone_home=$(ss -Hnto state established '( sport = :ssh )' | head -n1 | awk '{ split($4, a, ":"); print a[1] }')
+            if [ -n "$phone_home" ]; then
+              echo -e "\nroute $phone_home 255.255.255.255 net_gateway" >> ~/.ovpn/config.ovpn
+            fi
+            echo -e "\nroute 169.254.0.0 255.255.0.0 net_gateway" >> ~/.ovpn/config.ovpn
+
+      - run:
+          name: Connect to VPN
+          command: |
+            wget -qO- http://checkip.amazonaws.com | tee initial.ip
+            sudo openvpn3 session-start --config ~/.ovpn/config.ovpn > ~/.ovpn/openvpn.log
+            cat ~/.ovpn/openvpn.log
+            wget -qO- http://checkip.amazonaws.com | tee final.ip
+
+
+      - run:
+          name: Run the tests
           command: |
             python3 -m venv the_venv
             source the_venv/bin/activate
