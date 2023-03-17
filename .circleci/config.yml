@@ -55,10 +55,8 @@ jobs:
       - run:
           name: Connect to VPN
           command: >
-            wget -qO- http://checkip.amazonaws.com | tee initial.ip
-            sudo openvpn --config ~/.ovpn/config.ovpn
+            sudo openvpn --config ~/.ovpn/config.ovpn  > ~/.ovpn/openvpn.log 2>&1 &
             cat openvpn.log
-            wget -qO- http://checkip.amazonaws.com | tee final.ip
 
       - run:
           name: Run the tests
