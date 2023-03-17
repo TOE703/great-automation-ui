@@ -11,49 +11,50 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          name: Install OpenVPN
+          command: |
+            sudo apt update
+            sudo apt install apt-transport-https
+            sudo wget https://swupdate.openvpn.net/repos/openvpn-repo-pkg-key.pub
+            sudo apt-key add openvpn-repo-pkg-key.pub
+            sudo wget -O /etc/apt/sources.list.d/openvpn3.list https://swupdate.openvpn.net/community/openvpn3/repos/openvpn3-$(sed 's/UBUNTU_CODENAME=//;t;d' /etc/os-release).list
+            sudo apt update
+            sudo apt install -y openvpn3
+
+      - run:
+          name: Init VPN
+          command: |
+            sudo service dbus start
+            mkdir ~/.ovpn
+            echo $VPN_CONFIG | base64 --decode >> ~/.ovpn/config.ovpn
+
+      - run:
+          name: Connect to VPN
+          command: |
+            sudo openvpn3 session-start --config ~/.ovpn/config.ovpn > ~/.ovpn/openvpn.log
+            cat ~/.ovpn/openvpn.log
+
       # - run:
       #     name: Install OpenVPN
       #     command: |
-      #       sudo apt update
-      #       sudo apt install apt-transport-https
-      #       sudo wget https://swupdate.openvpn.net/repos/openvpn-repo-pkg-key.pub
-      #       sudo apt-key add openvpn-repo-pkg-key.pub
-      #       sudo wget -O /etc/apt/sources.list.d/openvpn3.list https://swupdate.openvpn.net/community/openvpn3/repos/openvpn3-$(sed 's/UBUNTU_CODENAME=//;t;d' /etc/os-release).list
-      #       sudo apt update
-      #       sudo apt install -y openvpn3
+      #       # There seems to be a bug with the openvpn aptrepo sources
+      #       sudo apt-get update # for apt-get to recognise openvpn
+      #       sudo apt-get remove openvpn # remove ubuntu aptrepo source
+      #       sudo apt-get update
+      #       sudo apt-get install openvpn openvpn-systemd-resolved -y
 
       # - run:
       #     name: Init VPN
       #     command: |
-      #       sudo service dbus start
       #       mkdir ~/.ovpn
       #       echo $VPN_CONFIG | base64 --decode >> ~/.ovpn/config.ovpn
 
       # - run:
       #     name: Connect to VPN
-      #     command: |
+      #     command: >
       #       wget -qO- http://checkip.amazonaws.com | tee initial.ip
-      #       sudo openvpn3 session-start --config ~/.ovpn/config.ovpn > ~/.ovpn/openvpn.log
-      #       cat ~/.ovpn/openvpn.log
-      #       wget -qO- http://checkip.amazonaws.com | tee final.ip
-
-      - run:
-          name: Install OpenVPN
-          command: |
-            # There seems to be a bug with the openvpn aptrepo sources
-            sudo apt-get update # for apt-get to recognise openvpn
-            sudo apt-get remove openvpn # remove ubuntu aptrepo source
-            sudo apt-get update
-            sudo apt-get install openvpn -y
-
-      - run:
-          name: VPN stuff
-          command: |
-            phone_home=$(netstat -an | grep ':22 .*ESTABLISHED' | head -n1 | awk '{split($5, a, ":"); print a[1] }')
-            mkdir ~/.ovpn
-            echo $VPN_CONFIG | base64 --decode >> ~/.ovpn/config.ovpn
-            sudo openvpn --config ~/.ovpn/config.ovpn --route $phone_home 255.255.255.255 net_gateway --route 169.254.0.0 255.255.0.0 net_gateway
-            sleep 10
+      #       sudo openvpn --config ~/.ovpn/config.ovpn
 
       - run:
           name: Run the tests
